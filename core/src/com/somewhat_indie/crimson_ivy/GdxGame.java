@@ -1,27 +1,57 @@
 package com.somewhat_indie.crimson_ivy;
 
-import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.somewhat_indie.crimson_ivy.screens.GameScreen;
+import com.somewhat_indie.crimson_ivy.screens.MainMenuScreen;
 
-public class GdxGame extends ApplicationAdapter {
-	SpriteBatch batch;
-	Texture img;
-	
+import java.util.Set;
+
+public class GdxGame extends Game {
+	public SpriteBatch batch;
+
+	private ScreenAdapter[] screens;
+
+	private 	ScreenState state;
+	public enum ScreenState{
+		MainMenu,
+		Game
+	}
+
 	@Override
 	public void create () {
 		batch = new SpriteBatch();
-		img = new Texture("badlogic.jpg");
+
+		screens = new ScreenAdapter[]{
+				new MainMenuScreen(this),
+				new GameScreen(this)
+		};
+
+		Settings.load();
+		Assets.load();
+
+		setState(ScreenState.MainMenu);
+
 	}
 
 	@Override
 	public void render () {
-		Gdx.gl.glClearColor(1, 0, 0, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		batch.begin();
-		batch.draw(img, 0, 0);
-		batch.end();
+		GL20 gl = Gdx.gl;
+		gl.glClearColor(.2f, .2f, .2f, 1);
+		gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+		super.render();
 	}
+
+	public void setState(ScreenState state){
+		this.state = state;
+
+		setScreen(screens[state.ordinal()]);
+
+	}
+
+	public ScreenState getState(){return state;}
 }
