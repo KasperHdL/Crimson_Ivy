@@ -63,7 +63,7 @@ public class GameScreen extends ScreenAdapter {
 
         engine.addSystem(new PlayerSystem());
 
-        engine.addSystem(new RenderSystem(game.batch));
+        engine.addSystem(new RenderSystem(game.batch,world));
 
         gameWorld.create();
 
@@ -112,7 +112,7 @@ public class GameScreen extends ScreenAdapter {
         game.batch.setProjectionMatrix(guiCam.combined);
         game.batch.begin();
 
-        Assets.font.draw(game.batch, "Game Running", Gdx.graphics.getWidth() / 2, 20);
+        Assets.font.draw(game.batch, state.name(), 5,Gdx.graphics.getHeight()-5);
         game.batch.end();
 
     }

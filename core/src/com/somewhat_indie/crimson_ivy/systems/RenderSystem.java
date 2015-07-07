@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.badlogic.gdx.physics.box2d.World;
 import com.somewhat_indie.crimson_ivy.Settings;
 import com.somewhat_indie.crimson_ivy.components.BodyComp;
 import com.somewhat_indie.crimson_ivy.components.TextureComp;
@@ -28,14 +29,16 @@ public class RenderSystem extends EntitySystem {
 
     private SpriteBatch batch;
 
-    public OrthographicCamera camera;
+    public static OrthographicCamera camera;
 
     private Box2DDebugRenderer debugRenderer;
+    private World world;
     private Matrix4 debugMatrix;
 
 
-    public RenderSystem(SpriteBatch batch){
+    public RenderSystem(SpriteBatch batch,World world){
         this.batch = batch;
+        this.world = world;
 
         camera = new OrthographicCamera(Gdx.graphics.getWidth() * Settings.pixelToMeter,Gdx.graphics.getHeight() * Settings.pixelToMeter);
         debugMatrix = new Matrix4(camera.combined);
@@ -80,7 +83,7 @@ public class RenderSystem extends EntitySystem {
         batch.end();
     }
 
-    public OrthographicCamera getCamera(){
+    public static OrthographicCamera getCamera(){
         return camera;
     }
 }

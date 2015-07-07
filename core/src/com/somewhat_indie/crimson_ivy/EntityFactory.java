@@ -19,7 +19,7 @@ public class EntityFactory {
     public static Entity create_player(World world, Vector2 pos) {
         Entity entity = new Entity();
 
-        Vector2 size = new Vector2(1, 1f);
+        Vector2 size = new Vector2(2, 1f);
 
         PlayerComp player = new PlayerComp();
         entity.add(player);
@@ -28,23 +28,23 @@ public class EntityFactory {
         entity.add(transform);
 
         KeyboardComp input = new KeyboardComp();
-        input.leftKey = Input.Keys.LEFT;
-        input.rightKey = Input.Keys.RIGHT;
-        input.upKey = Input.Keys.UP;
-        input.downKey= Input.Keys.DOWN;
+        input.leftKey = Input.Keys.A;
+        input.rightKey = Input.Keys.D;
+        input.upKey = Input.Keys.W;
+        input.downKey= Input.Keys.S ;
         entity.add(input);
 
         TextureComp texture = new TextureComp(0xbadaffff);
         texture.region.setRegionWidth((int) (Settings.meterToPixel * size.x));
-        texture.region.setRegionHeight((int)(Settings.meterToPixel *  size.y));
+        texture.region.setRegionHeight((int) (Settings.meterToPixel * size.y));
         entity.add(texture);
 
 
         PolygonShape shape = new PolygonShape();
         shape.setAsBox(size.x / 2, size.y / 2);
 
-        BodyComp bodyComp = new BodyComp(world, BodyDef.BodyType.DynamicBody, shape, pos, .4f, .1f);
-        bodyComp.body.setLinearDamping(0.8f);
+        BodyComp bodyComp = new BodyComp(world, BodyDef.BodyType.DynamicBody, shape, pos, 1f, 1f);
+        bodyComp.body.setLinearDamping(10f);
         entity.add(bodyComp);
 
         shape.dispose();
@@ -76,11 +76,11 @@ public class EntityFactory {
     }
 
 
-    public static Entity create_camera(RenderSystem renderSystem, Entity target){
+    public static Entity create_camera(Entity target){
         Entity entity = new Entity();
 
         CameraComp camera = new CameraComp();
-        camera.camera = renderSystem.getCamera();
+        camera.camera = RenderSystem.getCamera();
         camera.target = target;
         camera.drag = 0.4f;
 

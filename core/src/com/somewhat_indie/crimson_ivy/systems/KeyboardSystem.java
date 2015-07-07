@@ -49,7 +49,7 @@ public class KeyboardSystem extends EntitySystem implements InputProcessor {
             if(keycode == keyboard.downKey)keyboard.downDown    = false;
         }
 
-        return false;
+        return true;
     }
 
     @Override

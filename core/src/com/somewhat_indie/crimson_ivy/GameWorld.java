@@ -35,7 +35,7 @@ public class GameWorld {
         Vector2 pos = new Vector2(0, 0);
 
         Entity player = EntityFactory.create_player(world, pos);
-        Entity camera = EntityFactory.create_camera(engine.getSystem(RenderSystem.class), player);
+        Entity camera = EntityFactory.create_camera(player);
 
 
         for(int i = 0;i<100;i++){
@@ -59,6 +59,10 @@ public class GameWorld {
         engine.addEntity(camera);
 
         Gdx.app.log("Game World", "created");
+    }
+
+    public World getWorld(){
+        return world;
     }
 
 

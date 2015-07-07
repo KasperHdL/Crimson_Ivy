@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.somewhat_indie.crimson_ivy.components.BodyComp;
@@ -18,8 +19,8 @@ public class CameraSystem extends IteratingSystem {
     private ComponentMapper<CameraComp> cameraMap = ComponentMapper.getFor(CameraComp.class);
     private ComponentMapper<BodyComp> bodyMap = ComponentMapper.getFor(BodyComp.class);
 
-    public CameraSystem() {
-        //noinspection unchecked
+        public CameraSystem() {
+            //noinspection unchecked
         super(Family.all(CameraComp.class).get());
 
         cameraMap = ComponentMapper.getFor(CameraComp.class);
