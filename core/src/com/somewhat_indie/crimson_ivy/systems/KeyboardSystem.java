@@ -3,8 +3,7 @@ package com.somewhat_indie.crimson_ivy.systems;
 import com.badlogic.ashley.core.*;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.InputProcessor;
-import com.somewhat_indie.crimson_ivy.components.input.InputComp;
-import com.somewhat_indie.crimson_ivy.components.input.KeyboardComp;
+import com.somewhat_indie.crimson_ivy.components.input.KeyboardMouseComp;
 
 /**
  * Created by kaholi on 7/7/15.
@@ -13,11 +12,11 @@ public class KeyboardSystem extends EntitySystem implements InputProcessor {
 
     private ImmutableArray<Entity> entities;
 
-    private ComponentMapper<KeyboardComp> keyboardMap = ComponentMapper.getFor(KeyboardComp.class);
+    private ComponentMapper<KeyboardMouseComp> keyboardMap = ComponentMapper.getFor(KeyboardMouseComp.class);
 
     public void addedToEngine(Engine engine){
         //noinspection unchecked
-        entities = engine.getEntitiesFor(Family.all(KeyboardComp.class).get());
+        entities = engine.getEntitiesFor(Family.all(KeyboardMouseComp.class).get());
     }
 
 
@@ -25,13 +24,12 @@ public class KeyboardSystem extends EntitySystem implements InputProcessor {
     public boolean keyDown(int keycode) {
 
         for(int i = 0;i<entities.size();i++){
-            Entity entity = entities.get(i);
-            KeyboardComp keyboard = keyboardMap.get(entity);
+            KeyboardMouseComp component = keyboardMap.get(entities.get(i));
 
-            if(keycode == keyboard.leftKey) keyboard.leftDown   = true;
-            if(keycode == keyboard.rightKey)keyboard.rightDown  = true;
-            if(keycode == keyboard.upKey)   keyboard.upDown     = true;
-            if(keycode == keyboard.downKey) keyboard.downDown   = true;
+            if(keycode == component.leftKey)    component.leftDown   = true;
+            if(keycode == component.rightKey)   component.rightDown  = true;
+            if(keycode == component.upKey)      component.upDown     = true;
+            if(keycode == component.downKey)    component.downDown   = true;
         }
 
         return false;
@@ -40,13 +38,12 @@ public class KeyboardSystem extends EntitySystem implements InputProcessor {
     @Override
     public boolean keyUp(int keycode) {
         for(int i = 0;i<entities.size();i++){
-            Entity entity = entities.get(i);
-            KeyboardComp keyboard = keyboardMap.get(entity);
+            KeyboardMouseComp component = keyboardMap.get(entities.get(i));
 
-            if(keycode == keyboard.leftKey)keyboard.leftDown    = false;
-            if(keycode == keyboard.rightKey)keyboard.rightDown  = false;
-            if(keycode == keyboard.upKey)keyboard.upDown        = false;
-            if(keycode == keyboard.downKey)keyboard.downDown    = false;
+            if(keycode == component.leftKey)    component.leftDown   = false;
+            if(keycode == component.rightKey)   component.rightDown  = false;
+            if(keycode == component.upKey)      component.upDown     = false;
+            if(keycode == component.downKey)    component.downDown   = false;
         }
 
         return true;
@@ -59,11 +56,22 @@ public class KeyboardSystem extends EntitySystem implements InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        for (int i = 0; i < entities.size(); i++) {
+            KeyboardMouseComp component = keyboardMap.get(entities.get(i));
+            if (button == component.attackKey)
+                component.attackDown = true;
+        }
         return false;
     }
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+        for (int i = 0; i < entities.size(); i++) {
+            KeyboardMouseComp component = keyboardMap.get(entities.get(i));
+            if (button == component.attackKey)
+                component.attackDown = false;
+        }
+
         return false;
     }
 

@@ -1,9 +1,12 @@
 package com.somewhat_indie.crimson_ivy.screens;
 
+import box2dLight.PointLight;
+import box2dLight.RayHandler;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector2;
@@ -35,6 +38,7 @@ public class GameScreen extends ScreenAdapter {
 
     OrthographicCamera guiCam;
 
+    RayHandler rayHandler;
 
     World world;
 
@@ -51,9 +55,17 @@ public class GameScreen extends ScreenAdapter {
         guiCam.position.set(guiCam.viewportWidth/2,guiCam.viewportHeight/2,0);
 
         engine = new Engine();
-        world = new World(new Vector2(0,0),true);
 
-        gameWorld = new GameWorld(engine,world);
+        world = new World(Vector2.Zero,true);
+        rayHandler = new RayHandler(world);
+
+        RayHandler.setGammaCorrection(true);
+        RayHandler.useDiffuseLight(true);
+
+        rayHandler.setAmbientLight(0f, 0f, 0f, 0.5f);
+        rayHandler.setBlurNum(3);
+
+        gameWorld = new GameWorld(engine,world,rayHandler);
 
         engine.addSystem(new CameraSystem());
 
@@ -63,7 +75,7 @@ public class GameScreen extends ScreenAdapter {
 
         engine.addSystem(new PlayerSystem());
 
-        engine.addSystem(new RenderSystem(game.batch,world));
+        engine.addSystem(new RenderSystem(game.batch,world,rayHandler));
 
         gameWorld.create();
 
@@ -94,9 +106,8 @@ public class GameScreen extends ScreenAdapter {
     }
 
     private void update_gameRunning(float deltaTime){
-
-        world.step(deltaTime,6,2);
         engine.update(deltaTime);
+        world.step(deltaTime,6,2);
     }
 
     private void update_gamePaused(float deltaTime){
@@ -142,7 +153,7 @@ public class GameScreen extends ScreenAdapter {
         }
 
 
-        engine.getSystem(RenderSystem.class).camera.translate(velX * deltaTime, velY * deltaTime);
+        RenderSystem.camera.translate(velX * deltaTime, velY * deltaTime);
 
     }
 

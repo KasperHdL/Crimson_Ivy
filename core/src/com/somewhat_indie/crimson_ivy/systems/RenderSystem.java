@@ -1,8 +1,11 @@
 package com.somewhat_indie.crimson_ivy.systems;
 
+import box2dLight.PointLight;
+import box2dLight.RayHandler;
 import com.badlogic.ashley.core.*;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -35,16 +38,21 @@ public class RenderSystem extends EntitySystem {
     private World world;
     private Matrix4 debugMatrix;
 
+    private RayHandler rayHandler;
 
-    public RenderSystem(SpriteBatch batch,World world){
+
+    public RenderSystem(SpriteBatch batch,World world,RayHandler rayHandler){
         this.batch = batch;
         this.world = world;
 
         camera = new OrthographicCamera(Gdx.graphics.getWidth() * Settings.pixelToMeter,Gdx.graphics.getHeight() * Settings.pixelToMeter);
+        camera.update();
         debugMatrix = new Matrix4(camera.combined);
         debugRenderer = new Box2DDebugRenderer();
         debugRenderer.setDrawVelocities(true);
         debugRenderer.setDrawBodies(true);
+
+        this.rayHandler = rayHandler;
 
     }
 
@@ -59,6 +67,7 @@ public class RenderSystem extends EntitySystem {
 
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
+
 
         //debugRenderer.render(world, debugMatrix);
 
@@ -81,6 +90,9 @@ public class RenderSystem extends EntitySystem {
         }
 
         batch.end();
+
+        rayHandler.setCombinedMatrix(camera);
+        rayHandler.updateAndRender();
     }
 
     public static OrthographicCamera getCamera(){
