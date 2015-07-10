@@ -6,6 +6,7 @@ import com.badlogic.ashley.core.Engine;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.ai.msg.MessageManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -15,10 +16,7 @@ import com.somewhat_indie.crimson_ivy.Assets;
 import com.somewhat_indie.crimson_ivy.GameWorld;
 import com.somewhat_indie.crimson_ivy.GdxGame;
 import com.somewhat_indie.crimson_ivy.Settings;
-import com.somewhat_indie.crimson_ivy.systems.CameraSystem;
-import com.somewhat_indie.crimson_ivy.systems.KeyboardSystem;
-import com.somewhat_indie.crimson_ivy.systems.PlayerSystem;
-import com.somewhat_indie.crimson_ivy.systems.RenderSystem;
+import com.somewhat_indie.crimson_ivy.systems.*;
 
 /**
  * Created by kaholi on 7/3/15.
@@ -75,6 +73,7 @@ public class GameScreen extends ScreenAdapter {
 
         engine.addSystem(new PlayerSystem());
 
+        engine.addSystem(new StateSystem());
         engine.addSystem(new RenderSystem(game.batch,world,rayHandler));
 
         gameWorld.create();
@@ -130,6 +129,7 @@ public class GameScreen extends ScreenAdapter {
     @Override
     public void render(float deltaTime){
         update(deltaTime);
+        MessageManager.getInstance().update(deltaTime);
         drawUI();
     }
 

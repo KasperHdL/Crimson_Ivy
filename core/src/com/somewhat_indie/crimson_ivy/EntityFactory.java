@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.somewhat_indie.crimson_ivy.ai.EnemyMeleeStates;
 import com.somewhat_indie.crimson_ivy.components.*;
 import com.somewhat_indie.crimson_ivy.components.input.KeyboardMouseComp;
 import com.somewhat_indie.crimson_ivy.systems.RenderSystem;
@@ -104,6 +105,7 @@ public class EntityFactory {
         texture.region.setRegionHeight((int) (Settings.meterToPixel * size.y));
         entity.add(texture);
 
+        //box2d body
 
         PolygonShape shape = new PolygonShape();
         shape.setAsBox(size.x / 2, size.y / 2);
@@ -112,6 +114,8 @@ public class EntityFactory {
         bodyComp.body.setLinearDamping(10f);
         bodyComp.body.setAngularDamping(10f);
         entity.add(bodyComp);
+
+        //lights
 
         Color lightColor = new Color(1,.3f,0,.04f);
         LightComp lightComp = new LightComp();
@@ -122,6 +126,11 @@ public class EntityFactory {
         lightComp.lights.put("centerPoint",light);
 
         entity.add(lightComp);
+
+        //ai
+
+        AIComp ai = new AIComp(entity, EnemyMeleeStates.IDLE,EnemyMeleeStates.GLOBAL_STATE);
+        entity.add(ai);
 
         shape.dispose();
         return entity;
