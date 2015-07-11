@@ -56,7 +56,7 @@ public class GameScreen extends ScreenAdapter {
         RayHandler.setGammaCorrection(true);
         RayHandler.useDiffuseLight(true);
 
-        rayHandler.setAmbientLight(1f, 1f, 1f, 0.5f);
+        rayHandler.setAmbientLight(.06f, 0.03f, 0.03f, 1f);
         rayHandler.setBlurNum(3);
 
         gameWorld = new GameWorld(engine,world,rayHandler);

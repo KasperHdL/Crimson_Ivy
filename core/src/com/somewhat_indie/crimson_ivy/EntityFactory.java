@@ -78,6 +78,7 @@ public class EntityFactory {
             //movement variables
             bodyComp.setMaxLinearSpeed(80000f);
             bodyComp.setMaxLinearAcceleration(20000f);
+            bodyComp.setIndependentFacing(true);
 
 
             Color lightColor = new Color(1, 1, 1, .7f);
@@ -164,9 +165,9 @@ public class EntityFactory {
             ai.steeringBehaviors.put("seek", seek);
 
             Wander<Vector2> wander = new Wander<>(bodyComp);
-            wander.setWanderRadius(15f);
+            wander.setWanderRadius(10f);
             wander.setWanderOffset(20f);
-            wander.setWanderRate(.1f);
+            wander.setWanderRate(1);
 
             limiter = new AgentLimiter();
             limiter.setMaxLinearSpeed(5000f);
