@@ -3,11 +3,12 @@ package com.somewhat_indie.crimson_ivy.systems;
 import com.badlogic.ashley.core.*;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.ai.msg.Telegram;
+import com.badlogic.gdx.ai.msg.Telegraph;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
-import com.somewhat_indie.crimson_ivy.components.AgentComp;
 import com.somewhat_indie.crimson_ivy.components.BodyComp;
 import com.somewhat_indie.crimson_ivy.components.PlayerComp;
 import com.somewhat_indie.crimson_ivy.components.input.ControllerComp;
@@ -18,23 +19,19 @@ import com.somewhat_indie.crimson_ivy.components.items.WeaponComp;
  * Created by kaholi on 7/6/15.
  */
 
-public class PlayerSystem extends EntitySystem{
+public class PlayerSystem extends EntitySystem implements Telegraph{
 
-    private ImmutableArray<Entity> players;
+    public static ImmutableArray<Entity> players;
 
     private ComponentMapper<PlayerComp>         playerMap   = ComponentMapper.getFor(PlayerComp.class);
-    private ComponentMapper<AgentComp>          agentMap    = ComponentMapper.getFor(AgentComp.class);
     private ComponentMapper<WeaponComp>         weaponMap   = ComponentMapper.getFor(WeaponComp.class);
     private ComponentMapper<KeyboardMouseComp>  keyboardMap = ComponentMapper.getFor(KeyboardMouseComp.class);
     private ComponentMapper<BodyComp>           bodyMap     = ComponentMapper.getFor(BodyComp.class);
 
-    private Engine engine;
 
     public void addedToEngine(Engine engine){
         //noinspection unchecked
-        players = engine.getEntitiesFor(Family.all(PlayerComp.class, AgentComp.class, BodyComp.class).one(KeyboardMouseComp.class, ControllerComp.class).get());
-
-        this.engine = engine;
+        players = engine.getEntitiesFor(Family.all(PlayerComp.class, BodyComp.class).one(KeyboardMouseComp.class, ControllerComp.class).get());
     }
 
     public void update(float deltaTime){
@@ -43,15 +40,16 @@ public class PlayerSystem extends EntitySystem{
             Entity entity = players.get(i);
 
             PlayerComp player = playerMap.get(entity);
-            AgentComp agent = agentMap.get(entity);
-            Body body = bodyMap.get(entity).body;
+            BodyComp bodyComp = bodyMap.get(entity);
 
 
             if (player.usingKeyboardMouse){
                 KeyboardMouseComp input = keyboardMap.get(entity);
 
-                handleMovementKeyboardMouse(agent, body, input);
-                handleDirectionKeyboardMouse(body);
+                handleMovementKeyboardMouse(bodyComp, input, deltaTime);
+                handleDirectionKeyboardMouse(bodyComp.body);
+
+                capMovement(bodyComp);
 
                 if(input.attackDown){
 
@@ -61,9 +59,11 @@ public class PlayerSystem extends EntitySystem{
         }
     }
 
-    private void handleMovementKeyboardMouse(AgentComp agent, Body body, KeyboardMouseComp input){
+    private void handleMovementKeyboardMouse(BodyComp bodyComp, KeyboardMouseComp input,float deltaTime){
         float x = 0;
         float y = 0;
+
+        Body body = bodyComp.body;
 
         if (input.rightDown) {
             x = 1;
@@ -77,9 +77,29 @@ public class PlayerSystem extends EntitySystem{
             y = -1;
         }
 
-        Vector2 force = new Vector2(x,y).nor().scl(agent.force);
-
+        Vector2 force = new Vector2(x,y).nor().scl(bodyComp.getMaxLinearAcceleration());
+        force.scl(deltaTime);
         body.applyForceToCenter(force, true);
+
+    }
+
+    private void capMovement(BodyComp bodyComp){
+        Body body = bodyComp.body;
+        // Cap the linear speed
+        Vector2 velocity = body.getLinearVelocity();
+        float currentSpeedSquare = velocity.len2();
+        float maxLinearSpeed = bodyComp.getMaxLinearSpeed();
+        if (currentSpeedSquare > maxLinearSpeed * maxLinearSpeed) {
+            body.setLinearVelocity(velocity.scl(maxLinearSpeed / (float)Math.sqrt(currentSpeedSquare)));
+        }
+
+        /*
+        // Cap the angular speed --currently just setting the angle
+        float maxAngVelocity = bodyComp.getMaxAngularSpeed();
+        if (body.getAngularVelocity() > maxAngVelocity) {
+            body.setAngularVelocity(maxAngVelocity);
+        }
+        */
     }
 
     private void handleDirectionKeyboardMouse(Body body){
@@ -96,5 +116,12 @@ public class PlayerSystem extends EntitySystem{
         float angle = MathUtils.degRad * delta.angle();
 
         body.setTransform(body.getPosition(),angle);
+    }
+
+    @Override
+    public boolean handleMessage(Telegram msg) {
+
+
+        return false;
     }
 }

@@ -1,21 +1,17 @@
 package com.somewhat_indie.crimson_ivy.screens;
 
-import box2dLight.PointLight;
 import box2dLight.RayHandler;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.ai.msg.MessageManager;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.somewhat_indie.crimson_ivy.Assets;
 import com.somewhat_indie.crimson_ivy.GameWorld;
 import com.somewhat_indie.crimson_ivy.GdxGame;
-import com.somewhat_indie.crimson_ivy.Settings;
 import com.somewhat_indie.crimson_ivy.systems.*;
 
 /**
@@ -38,7 +34,7 @@ public class GameScreen extends ScreenAdapter {
 
     RayHandler rayHandler;
 
-    World world;
+    public static World world;
 
     GameWorld gameWorld;
 
@@ -60,7 +56,7 @@ public class GameScreen extends ScreenAdapter {
         RayHandler.setGammaCorrection(true);
         RayHandler.useDiffuseLight(true);
 
-        rayHandler.setAmbientLight(0f, 0f, 0f, 0.5f);
+        rayHandler.setAmbientLight(1f, 1f, 1f, 0.5f);
         rayHandler.setBlurNum(3);
 
         gameWorld = new GameWorld(engine,world,rayHandler);
@@ -74,6 +70,7 @@ public class GameScreen extends ScreenAdapter {
         engine.addSystem(new PlayerSystem());
 
         engine.addSystem(new StateSystem());
+        engine.addSystem(new SteeringSystem());
         engine.addSystem(new RenderSystem(game.batch,world,rayHandler));
 
         gameWorld.create();

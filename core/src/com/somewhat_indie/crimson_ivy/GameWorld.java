@@ -34,7 +34,8 @@ public class GameWorld {
 
         Vector2 pos = new Vector2(0, 0);
 
-        Entity player = EntityFactory.create_player(pos);
+        Entity player = EntityFactory.Player.create_keyboard(pos);
+
         Entity camera = EntityFactory.create_camera(player);
 
 
@@ -54,8 +55,9 @@ public class GameWorld {
 
         for (int i = 0; i < 10; i++) {
             engine.addEntity(
-                    EntityFactory.create_enemy_melee(
-                            new Vector2(i * 10, 0)
+                    EntityFactory.Enemy.create_melee(
+                            new Vector2(i * 10, 0),
+                            player
                     ));
         }
 
