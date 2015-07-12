@@ -13,6 +13,8 @@ import com.somewhat_indie.crimson_ivy.screens.MainMenuScreen;
 public class GdxGame extends Game {
 	public SpriteBatch batch;
 
+	public static float TIME = 0f;
+
 	private ScreenAdapter[] screens;
 
 	private 	ScreenState state;
@@ -39,6 +41,8 @@ public class GdxGame extends Game {
 
 	@Override
 	public void render () {
+		TIME += Gdx.graphics.getDeltaTime();
+
 		GL20 gl = Gdx.gl;
 		gl.glClearColor(.2f, .2f, .2f, 1);
 		gl.glClear(GL20.GL_COLOR_BUFFER_BIT);

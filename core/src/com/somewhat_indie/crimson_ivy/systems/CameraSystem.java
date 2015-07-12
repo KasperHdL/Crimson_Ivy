@@ -34,10 +34,10 @@ public class CameraSystem extends IteratingSystem {
         if (cam.target == null) {
             return;
         }
-
-        Body target = bodyMap.get(cam.target).body;
-
-        if (target == null) {
+        Body target;
+        try {
+             target = bodyMap.get(cam.target).body;
+        }catch (NullPointerException e){
             return;
         }
 

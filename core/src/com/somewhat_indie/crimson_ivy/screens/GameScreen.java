@@ -59,6 +59,7 @@ public class GameScreen extends ScreenAdapter {
         rayHandler.setAmbientLight(.06f, 0.03f, 0.03f, 1f);
         rayHandler.setBlurNum(3);
 
+
         gameWorld = new GameWorld(engine,world,rayHandler);
 
         engine.addSystem(new CameraSystem());

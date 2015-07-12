@@ -1,15 +1,17 @@
 package com.somewhat_indie.crimson_ivy.ai.states;
 
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.fsm.State;
 import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.ai.steer.behaviors.Seek;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Fixture;
-import com.badlogic.gdx.physics.box2d.QueryCallback;
+import com.somewhat_indie.crimson_ivy.GdxGame;
 import com.somewhat_indie.crimson_ivy.components.AIComp;
+import com.somewhat_indie.crimson_ivy.components.AgentComp;
 import com.somewhat_indie.crimson_ivy.components.BodyComp;
+import com.somewhat_indie.crimson_ivy.components.items.WeaponComp;
 import com.somewhat_indie.crimson_ivy.screens.GameScreen;
 import com.somewhat_indie.crimson_ivy.systems.PlayerSystem;
 
@@ -21,7 +23,7 @@ public enum EnemyMeleeStates implements State<Entity> {
     COMBAT(){
         @Override
         public void enter(Entity entity) {
-            Gdx.app.log("Enemy Melee AI", "entered idle");
+            Gdx.app.log("Enemy Melee AI", "entered combat");
             BodyComp body = entity.getComponent(BodyComp.class);
             Seek<Vector2> seek = (Seek<Vector2>) entity.getComponent(AIComp.class).steeringBehaviors.get("seek");
             if(seek.getTarget() != null)
@@ -33,18 +35,24 @@ public enum EnemyMeleeStates implements State<Entity> {
 
         @Override
         public void update(Entity entity) {
-            Seek<Vector2> seek = (Seek < Vector2 >) entity.getComponent(AIComp.class).steeringBehaviors.get("seek");
-            if(seek.getTarget() != null){
+            AIComp ai = entity.getComponent(AIComp.class);
+            if(ai.target.getComponent(AgentComp.class).isAlive){
 
-                Vector2 pos = seek.getOwner().getPosition();
-                Vector2 playerPos = seek.getTarget().getPosition();
+                Vector2 pos = entity.getComponent(BodyComp.class).getPosition();
+                Vector2 playerPos = ai.target.getComponent(BodyComp.class).getPosition();
 
-                if(playerPos.sub(pos).len() > disengageRadius){
-                    seek.setTarget(null);
-                    entity.getComponent(AIComp.class).stateMachine.changeState(WANDER);
+                float dist = playerPos.sub(pos).len();
+
+                if(dist < attackRadius) {
+                    if(GdxGame.TIME > nextAllowedAttack){
+                        attack(entity);
+                    }
+                }else if(dist > disengageRadius){
+                    disengage(entity);
                 }
+
             }else
-                entity.getComponent(AIComp.class).stateMachine.changeState(WANDER);
+                disengage(entity);
         }
 
         @Override
@@ -61,7 +69,7 @@ public enum EnemyMeleeStates implements State<Entity> {
     WANDER(){
         @Override
         public void enter(Entity entity) {
-            Gdx.app.log("Enemy Melee AI", "entered idle");
+            Gdx.app.log("Enemy Melee AI", "entered wander");
             BodyComp body = entity.getComponent(BodyComp.class);
             body.setSteeringBehavior(entity.getComponent(AIComp.class).steeringBehaviors.get("wander"));
         }
@@ -79,8 +87,7 @@ public enum EnemyMeleeStates implements State<Entity> {
 
                 if(playerPos.sub(pos).len() < engageRadius){
                     foundPlayer = true;
-                    ((Seek<Vector2>) entity.getComponent(AIComp.class).steeringBehaviors.get("seek")).setTarget(player.getComponent(BodyComp.class));
-                    entity.getComponent(AIComp.class).stateMachine.changeState(COMBAT);
+                    engage(entity,player);
                     return;
                 }
             }
@@ -94,7 +101,7 @@ public enum EnemyMeleeStates implements State<Entity> {
 
         @Override
         public void exit(Entity entity) {
-            Gdx.app.log("Enemy Melee AI", "exited idle");
+            Gdx.app.log("Enemy Melee AI", "exited wander");
         }
 
         @Override
@@ -126,5 +133,40 @@ public enum EnemyMeleeStates implements State<Entity> {
 
     protected float disengageRadius = 10f;
     protected float engageRadius = 6f;
+
+    protected void engage(Entity entity, Entity target){
+        ((Seek<Vector2>) entity.getComponent(AIComp.class).steeringBehaviors.get("seek")).setTarget(target.getComponent(BodyComp.class));
+
+        AIComp ai = entity.getComponent(AIComp.class);
+        ai.stateMachine.changeState(COMBAT);
+        ai.target = target;
+    }
+
+    protected void disengage(Entity entity){
+        ((Seek<Vector2>)entity.getComponent(AIComp.class).steeringBehaviors.get("seek")).setTarget(null);
+
+        AIComp ai = entity.getComponent(AIComp.class);
+        ai.stateMachine.changeState(WANDER);
+        ai.target = null;
+    }
+
+    protected float attackRadius = 3f;
+    protected float nextAllowedAttack = 0;
+    protected float attackDelay = .1f;
+
+    protected void attack(Entity entity){
+        AIComp ai = entity.getComponent(AIComp.class);
+        if(ai.target == null)return;
+
+        nextAllowedAttack = GdxGame.TIME + attackDelay;
+
+        Gdx.app.log("Enemy Melee", "attacking " + ai.target);
+        if(ai.target.getComponent(AgentComp.class).takeDamage(entity.getComponent(WeaponComp.class).damage)){
+            //killed player
+            //disengage(entity);
+
+        }
+
+    }
 
 }

@@ -18,6 +18,8 @@ import java.util.HashMap;
  */
 public class AIComp extends Component implements Telegraph {
 
+    public Entity target;
+
     public StateMachine<Entity> stateMachine;
     public HashMap<String,SteeringBehavior> steeringBehaviors;
 
