@@ -1,6 +1,5 @@
 package com.somewhat_indie.crimson_ivy.systems;
 
-import box2dLight.RayHandler;
 import com.badlogic.ashley.core.*;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
@@ -8,9 +7,11 @@ import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.ai.msg.Telegraph;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
+import com.somewhat_indie.crimson_ivy.EntityData;
 import com.somewhat_indie.crimson_ivy.EntityFactory;
+import com.somewhat_indie.crimson_ivy.GameWorld;
+import com.somewhat_indie.crimson_ivy.GdxGame;
 import com.somewhat_indie.crimson_ivy.components.AgentComp;
 import com.somewhat_indie.crimson_ivy.components.BodyComp;
 import com.somewhat_indie.crimson_ivy.components.LightComp;
@@ -18,6 +19,7 @@ import com.somewhat_indie.crimson_ivy.components.PlayerComp;
 import com.somewhat_indie.crimson_ivy.components.input.ControllerComp;
 import com.somewhat_indie.crimson_ivy.components.input.KeyboardMouseComp;
 import com.somewhat_indie.crimson_ivy.components.items.WeaponComp;
+import com.somewhat_indie.crimson_ivy.raycasts.RayCastClosestHitable;
 import com.somewhat_indie.crimson_ivy.screens.GameScreen;
 
 /**
@@ -33,12 +35,10 @@ public class PlayerSystem extends EntitySystem implements Telegraph{
     private ComponentMapper<KeyboardMouseComp>  keyboardMap = ComponentMapper.getFor(KeyboardMouseComp.class);
     private ComponentMapper<BodyComp>           bodyMap     = ComponentMapper.getFor(BodyComp.class);
 
-    private Engine engine;
 
     public void addedToEngine(Engine engine){
         //noinspection unchecked
         players = engine.getEntitiesFor(Family.all(PlayerComp.class, BodyComp.class).one(KeyboardMouseComp.class, ControllerComp.class).get());
-        this.engine = engine;
     }
 
     public void update(float deltaTime){
@@ -48,56 +48,62 @@ public class PlayerSystem extends EntitySystem implements Telegraph{
             PlayerComp player = playerMap.get(entity);
             BodyComp bodyComp = bodyMap.get(entity);
 
-            if(entity.getComponent(AgentComp.class).isAlive == false){
+            if(!entity.getComponent(AgentComp.class).isAlive){
                 entity.getComponent(LightComp.class).lights = null;
 
-                engine.addEntity(EntityFactory.Player.create_corpse(bodyComp.getPosition()));
-                engine.removeEntity(entity);
-                GameScreen.world.destroyBody(bodyComp.body);
-
-                //TODO make sure this does not leak
+                GameWorld.create(EntityFactory.Player.create_player_corpse(bodyComp.getPosition(), bodyComp.getOrientation()));
+                GameWorld.destroy(entity);
 
                 continue;
             }
 
             if (player.usingKeyboardMouse){
-                KeyboardMouseComp input = keyboardMap.get(entity);
+                KeyboardMouseComp keyboard = keyboardMap.get(entity);
 
-                handleMovementKeyboardMouse(bodyComp, input, deltaTime);
-                handleDirectionKeyboardMouse(bodyComp.body);
+                keyboard.handleMovement(bodyComp, keyboard, deltaTime);
+                keyboard.handleDirection(bodyComp.body);
 
-                capMovement(bodyComp);
 
-                if(input.attackDown){
+                if(keyboard.attackDown && player.nextAllowedAttack < GdxGame.TIME){
                     //TODO check for enemies and attack them
+
+                    WeaponComp weapon = weaponMap.get(entity);
+                    player.nextAllowedAttack = GdxGame.TIME + weapon.attackDelay;
+
+                    Vector2 pos = bodyComp.getPosition();
+                    RayCastClosestHitable raycast = new RayCastClosestHitable();
+                    GameScreen.world.rayCast(
+                            raycast,
+                            pos.cpy(),
+                            pos.cpy().add(new Vector2(1, 0).rotate(bodyComp.getOrientation() * MathUtils.radDeg).scl(weapon.reach))
+                    );
+
+                    if(raycast.hit){
+                        EntityData data = (EntityData) raycast.body.getUserData();
+
+                        switch (data.type){
+                            case Wall:
+                                break;
+                            case Player:
+                                break;
+                            case Enemy:
+                                data.entity.getComponent(AgentComp.class).takeDamage(weapon.damage);
+                                break;
+                            case Corpse:
+                                break;
+                            case Camera:
+                                break;
+                        }
+
+                    }
+
+
                 }
             }
 
+            capMovement(bodyComp);
+
         }
-    }
-
-    private void handleMovementKeyboardMouse(BodyComp bodyComp, KeyboardMouseComp input,float deltaTime){
-        float x = 0;
-        float y = 0;
-
-        Body body = bodyComp.body;
-
-        if (input.rightDown) {
-            x = 1;
-        } else if (input.leftDown) {
-            x = -1;
-        }
-
-        if (input.upDown) {
-            y = 1;
-        } else if (input.downDown) {
-            y = -1;
-        }
-
-        Vector2 force = new Vector2(x,y).nor().scl(bodyComp.getMaxLinearAcceleration());
-        force.scl(deltaTime);
-        body.applyForceToCenter(force, true);
-
     }
 
     private void capMovement(BodyComp bodyComp){
@@ -119,24 +125,9 @@ public class PlayerSystem extends EntitySystem implements Telegraph{
         */
     }
 
-    private void handleDirectionKeyboardMouse(Body body){
-        Vector3 mouse = new Vector3(Gdx.input.getX(),Gdx.input.getY(),0);
-
-        Vector2 delta;
-        {
-            Vector3 v = RenderSystem.getCamera().unproject(mouse);
-            Vector2 wMouse = new Vector2(v.x, v.y);
-            delta = wMouse.sub(body.getPosition());
-        }
-
-
-        float angle = MathUtils.degRad * delta.angle();
-
-        body.setTransform(body.getPosition(),angle);
-    }
-
     @Override
     public boolean handleMessage(Telegram msg) {
         return false;
     }
+
 }

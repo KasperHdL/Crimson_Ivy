@@ -44,13 +44,19 @@ public class EntityFactory {
     }
 
     public static class Player{
-        public static Entity create_keyboard(Vector2 pos) {
+        public static Entity create_keyboard(Vector2 pos) {return create_keyboard(pos,0);}
+        public static Entity create_keyboard(Vector2 pos,float angle) {
             Entity entity = new Entity();
 
             Vector2 size = new Vector2(1.2f, 1f);
 
             entity.add(new AgentComp(50f));
-            entity.add(new WeaponComp(7f));
+
+            WeaponComp weapon = new WeaponComp();
+            weapon.damage = 4f;
+            weapon.reach = 5f;
+            weapon.attackDelay = .1f;
+            entity.add(weapon);
 
             PlayerComp player = new PlayerComp();
             entity.add(player);
@@ -76,7 +82,10 @@ public class EntityFactory {
             shape.setAsBox(size.x / 2, size.y / 2);
 
             BodyComp bodyComp = new BodyComp(world, BodyDef.BodyType.DynamicBody, shape, pos, 1f, 1f);
+            bodyComp.body.setTransform(pos, angle);
             bodyComp.body.setLinearDamping(10f);
+
+            bodyComp.body.setUserData(new EntityData(EntityData.EntityType.Player, entity));
             entity.add(bodyComp);
 
             //movement variables
@@ -112,7 +121,8 @@ public class EntityFactory {
             shape.dispose();
             return entity;
         }
-        public static Entity create_corpse(Vector2 pos) {
+        public static Entity create_player_corpse(Vector2 pos){return create_player_corpse(pos,0);}
+        public static Entity create_player_corpse(Vector2 pos, float angle) {
             Entity entity = new Entity();
 
             Vector2 size = new Vector2(1.2f, 1f);
@@ -120,7 +130,7 @@ public class EntityFactory {
             TransformComp transform = new TransformComp();
             entity.add(transform);
 
-            TextureComp texture = new TextureComp(0xbadaffff);
+            TextureComp texture = new TextureComp(0xbadaff88);
             texture.region.setRegionWidth((int) (Settings.meterToPixel * size.x));
             texture.region.setRegionHeight((int) (Settings.meterToPixel * size.y));
             entity.add(texture);
@@ -129,33 +139,11 @@ public class EntityFactory {
             shape.setAsBox(size.x / 2, size.y / 2);
 
             BodyComp bodyComp = new BodyComp(world, BodyDef.BodyType.DynamicBody, shape, pos, 1f, 1f);
+            bodyComp.body.setTransform(pos, angle);
             bodyComp.body.setLinearDamping(1f);
             bodyComp.body.setAngularDamping(1f);
+            bodyComp.body.setUserData(new EntityData(EntityData.EntityType.Corpse, entity));
             entity.add(bodyComp);
-
-            Color lightColor = new Color(1, 1, 1, .7f);
-            LightComp lightComp = new LightComp();
-            lightComp.lights = new HashMap<>(4);
-
-            PositionalLight light = new ConeLight(rayHandler, 80, lightColor, 32f, 0, 0, 0, 80);
-            light.attachToBody(bodyComp.body);
-            lightComp.lights.put("frontCone", light);
-
-            lightColor = new Color(1, 1, 1, .2f);
-
-            light = new ConeLight(rayHandler, 20, lightColor, 24f, 0, 0, 0, 20);
-            light.attachToBody(bodyComp.body, 0, 0, -100);
-            lightComp.lights.put("leftCone", light);
-
-            light = new ConeLight(rayHandler, 20, lightColor, 24f, 0, 0, 0, 20);
-            light.attachToBody(bodyComp.body, 0, 0, 100);
-            lightComp.lights.put("rightCone", light);
-
-            light = new ConeLight(rayHandler, 20, lightColor, 8f, 0, 0, 0, 60);
-            light.attachToBody(bodyComp.body, 0, 0, 180);
-            lightComp.lights.put("rightCone", light);
-
-            entity.add(lightComp);
 
             shape.dispose();
             return entity;
@@ -163,13 +151,19 @@ public class EntityFactory {
 
     }
     public static class Enemy{
-        public static Entity create_melee(Vector2 pos,Entity player) {
+        public static Entity create_melee(Vector2 pos){return create_melee(pos, 0);}
+        public static Entity create_melee(Vector2 pos,float angle) {
             Entity entity = new Entity();
 
             Vector2 size = new Vector2(1f, 1f);
 
             entity.add(new AgentComp(10f));
-            entity.add(new WeaponComp(5f));
+
+            WeaponComp weapon = new WeaponComp();
+            weapon.damage = 1f;
+            weapon.reach = 3f;
+            weapon.attackDelay = .3f;
+            entity.add(weapon);
 
             TransformComp transform = new TransformComp();
             entity.add(transform);
@@ -185,8 +179,10 @@ public class EntityFactory {
             shape.setAsBox(size.x / 2, size.y / 2);
 
             BodyComp bodyComp = new BodyComp(world, BodyDef.BodyType.DynamicBody, shape, pos, 1f, 1f);
+            bodyComp.body.setTransform(pos,angle);
             bodyComp.body.setLinearDamping(10f);
             bodyComp.body.setAngularDamping(10f);
+            bodyComp.body.setUserData(new EntityData(EntityData.EntityType.Enemy, entity));
             entity.add(bodyComp);
 
             //lights
@@ -240,13 +236,42 @@ public class EntityFactory {
             shape.dispose();
             return entity;
         }
+        public static Entity create_melee_corpse(Vector2 pos){return create_melee_corpse(pos, 0);}
+        public static Entity create_melee_corpse(Vector2 pos,float angle) {
+            Entity entity = new Entity();
+
+            Vector2 size = new Vector2(1f, 1f);
+
+            TransformComp transform = new TransformComp();
+            entity.add(transform);
+
+            TextureComp texture = new TextureComp(0xaa661188);
+            texture.region.setRegionWidth((int) (Settings.meterToPixel * size.x));
+            texture.region.setRegionHeight((int) (Settings.meterToPixel * size.y));
+            entity.add(texture);
+
+            //box2d body
+
+            PolygonShape shape = new PolygonShape();
+            shape.setAsBox(size.x / 2, size.y / 2);
+
+            BodyComp bodyComp = new BodyComp(world, BodyDef.BodyType.DynamicBody, shape, pos, 1f, 1f);
+            bodyComp.body.setTransform(pos,angle);
+            bodyComp.body.setLinearDamping(10f);
+            bodyComp.body.setAngularDamping(10f);
+            bodyComp.body.setUserData(new EntityData(EntityData.EntityType.Corpse, entity));
+            entity.add(bodyComp);
+
+            shape.dispose();
+            return entity;
+        }
 
     }
 
 
 
 
-    public static Entity create_box_filled(Vector2 pos, Vector2 size) {
+    public static Entity create_wall(Vector2 pos, Vector2 size) {
 
         Entity entity = new Entity();
 
@@ -263,6 +288,7 @@ public class EntityFactory {
         shape.setAsBox(size.x / 2, size.y / 2);
 
         BodyComp body = new BodyComp(world, BodyDef.BodyType.StaticBody, shape, pos, 1f, 0f);
+        body.body.setUserData(new EntityData(EntityData.EntityType.Wall, entity));
         entity.add(body);
         shape.dispose();
 

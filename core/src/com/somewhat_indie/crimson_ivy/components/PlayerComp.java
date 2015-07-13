@@ -9,6 +9,6 @@ import com.badlogic.gdx.math.Vector2;
 public class PlayerComp extends Component {
     public boolean usingKeyboardMouse = true;
 
-
+    public float nextAllowedAttack;
 
 }

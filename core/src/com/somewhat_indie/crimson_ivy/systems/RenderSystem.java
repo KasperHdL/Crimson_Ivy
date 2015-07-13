@@ -69,7 +69,6 @@ public class RenderSystem extends EntitySystem {
         batch.begin();
 
 
-        //debugRenderer.render(world, debugMatrix);
 
         for(int i = 0;i<entities.size();i++){
             Entity entity = entities.get(i);
@@ -86,13 +85,16 @@ public class RenderSystem extends EntitySystem {
             Vector2 origin = new Vector2(width/2,height/2);
             Vector2 bodyPos = body.getPosition().sub(origin);
 
-            batch.draw(tex,bodyPos.x,bodyPos.y,origin.x,origin.y,width,height,t.scale.x,t.scale.y,(body.getAngle()/ MathUtils.PI) * 180);
+            batch.draw(tex,bodyPos.x,bodyPos.y,origin.x,origin.y,width,height,t.scale.x,t.scale.y,body.getAngle() * MathUtils.radDeg);
         }
 
         batch.end();
 
         rayHandler.setCombinedMatrix(camera);
         rayHandler.updateAndRender();
+
+        debugMatrix.set(camera.combined);
+        debugRenderer.render(world, debugMatrix);
     }
 
     public static OrthographicCamera getCamera(){

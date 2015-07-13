@@ -1,5 +1,6 @@
 package com.somewhat_indie.crimson_ivy.ai.states;
 
+import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -7,10 +8,13 @@ import com.badlogic.gdx.ai.fsm.State;
 import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.ai.steer.behaviors.Seek;
 import com.badlogic.gdx.math.Vector2;
+import com.somewhat_indie.crimson_ivy.EntityFactory;
+import com.somewhat_indie.crimson_ivy.GameWorld;
 import com.somewhat_indie.crimson_ivy.GdxGame;
 import com.somewhat_indie.crimson_ivy.components.AIComp;
 import com.somewhat_indie.crimson_ivy.components.AgentComp;
 import com.somewhat_indie.crimson_ivy.components.BodyComp;
+import com.somewhat_indie.crimson_ivy.components.LightComp;
 import com.somewhat_indie.crimson_ivy.components.items.WeaponComp;
 import com.somewhat_indie.crimson_ivy.screens.GameScreen;
 import com.somewhat_indie.crimson_ivy.systems.PlayerSystem;
@@ -18,6 +22,7 @@ import com.somewhat_indie.crimson_ivy.systems.PlayerSystem;
 /**
  * Created by kaholi on 7/10/15.
  */
+@SuppressWarnings("unchecked")
 public enum EnemyMeleeStates implements State<Entity> {
 
     COMBAT(){
@@ -25,7 +30,8 @@ public enum EnemyMeleeStates implements State<Entity> {
         public void enter(Entity entity) {
             Gdx.app.log("Enemy Melee AI", "entered combat");
             BodyComp body = entity.getComponent(BodyComp.class);
-            Seek<Vector2> seek = (Seek<Vector2>) entity.getComponent(AIComp.class).steeringBehaviors.get("seek");
+            Seek<Vector2> seek;
+            seek = (Seek<Vector2>) entity.getComponent(AIComp.class).steeringBehaviors.get("seek");
             if(seek.getTarget() != null)
                 body.setSteeringBehavior(seek);
             else
@@ -43,7 +49,7 @@ public enum EnemyMeleeStates implements State<Entity> {
 
                 float dist = playerPos.sub(pos).len();
 
-                if(dist < attackRadius) {
+                if(dist < entity.getComponent(WeaponComp.class).reach) {
                     if(GdxGame.TIME > nextAllowedAttack){
                         attack(entity);
                     }
@@ -118,6 +124,15 @@ public enum EnemyMeleeStates implements State<Entity> {
 
         @Override
         public void update(Entity entity) {
+            if(!entity.getComponent(AgentComp.class).isAlive){
+                entity.getComponent(LightComp.class).lights = null;
+
+                BodyComp body = entity.getComponent(BodyComp.class);
+                GameWorld.create(EntityFactory.Enemy.create_melee_corpse(body.getPosition(),body.getOrientation()));
+                GameWorld.destroy(entity);
+
+                //TODO might be leaking!?
+            }
         }
 
         @Override
@@ -150,18 +165,17 @@ public enum EnemyMeleeStates implements State<Entity> {
         ai.target = null;
     }
 
-    protected float attackRadius = 3f;
     protected float nextAllowedAttack = 0;
-    protected float attackDelay = .1f;
 
     protected void attack(Entity entity){
         AIComp ai = entity.getComponent(AIComp.class);
         if(ai.target == null)return;
 
-        nextAllowedAttack = GdxGame.TIME + attackDelay;
+        WeaponComp weapon = entity.getComponent(WeaponComp.class);
+        nextAllowedAttack = GdxGame.TIME + weapon.attackDelay;
 
         Gdx.app.log("Enemy Melee", "attacking " + ai.target);
-        if(ai.target.getComponent(AgentComp.class).takeDamage(entity.getComponent(WeaponComp.class).damage)){
+        if(ai.target.getComponent(AgentComp.class).takeDamage(weapon.damage)){
             //killed player
             //disengage(entity);
 

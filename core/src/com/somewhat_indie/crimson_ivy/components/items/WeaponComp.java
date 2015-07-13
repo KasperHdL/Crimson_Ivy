@@ -8,7 +8,7 @@ import com.badlogic.ashley.core.Component;
 public class WeaponComp extends Component {
 
     public float damage;
+    public float reach;
 
-    public WeaponComp(float damage){this.damage = damage;}
-
+    public float attackDelay;
 }
