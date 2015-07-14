@@ -30,10 +30,11 @@ public class PlayerSystem extends EntitySystem implements Telegraph{
 
     public static ImmutableArray<Entity> players;
 
-    private ComponentMapper<PlayerComp>         playerMap   = ComponentMapper.getFor(PlayerComp.class);
-    private ComponentMapper<WeaponComp>         weaponMap   = ComponentMapper.getFor(WeaponComp.class);
-    private ComponentMapper<KeyboardMouseComp>  keyboardMap = ComponentMapper.getFor(KeyboardMouseComp.class);
-    private ComponentMapper<BodyComp>           bodyMap     = ComponentMapper.getFor(BodyComp.class);
+    private ComponentMapper<PlayerComp>         playerMap       = ComponentMapper.getFor(PlayerComp.class);
+    private ComponentMapper<WeaponComp>         weaponMap       = ComponentMapper.getFor(WeaponComp.class);
+    private ComponentMapper<KeyboardMouseComp>  keyboardMap     = ComponentMapper.getFor(KeyboardMouseComp.class);
+    private ComponentMapper<ControllerComp>     controllerMap   = ComponentMapper.getFor(ControllerComp.class);
+    private ComponentMapper<BodyComp>           bodyMap         = ComponentMapper.getFor(BodyComp.class);
 
 
     public void addedToEngine(Engine engine){
@@ -57,53 +58,64 @@ public class PlayerSystem extends EntitySystem implements Telegraph{
                 continue;
             }
 
-            if (player.usingKeyboardMouse){
+            //TODO refactor so controller & keyboard uses an abstract class or interface
+            if (keyboardMap.has(entity)){
                 KeyboardMouseComp keyboard = keyboardMap.get(entity);
 
-                keyboard.handleMovement(bodyComp, keyboard, deltaTime);
+                keyboard.handleMovement(bodyComp, deltaTime);
                 keyboard.handleDirection(bodyComp.body);
 
-
                 if(keyboard.attackDown && player.nextAllowedAttack < GdxGame.TIME){
-                    //TODO check for enemies and attack them
+                    attack(player,bodyComp,weaponMap.get(entity));
+                }
+            }else if(controllerMap.has(entity)){
+                ControllerComp controller = controllerMap.get(entity);
 
-                    WeaponComp weapon = weaponMap.get(entity);
-                    player.nextAllowedAttack = GdxGame.TIME + weapon.attackDelay;
+                controller.handleMovement(bodyComp, deltaTime);
+                controller.handleDirection(bodyComp.body);
 
-                    Vector2 pos = bodyComp.getPosition();
-                    RayCastClosestHitable raycast = new RayCastClosestHitable();
-                    GameScreen.world.rayCast(
-                            raycast,
-                            pos.cpy(),
-                            pos.cpy().add(new Vector2(1, 0).rotate(bodyComp.getOrientation() * MathUtils.radDeg).scl(weapon.reach))
-                    );
-
-                    if(raycast.hit){
-                        EntityData data = (EntityData) raycast.body.getUserData();
-
-                        switch (data.type){
-                            case Wall:
-                                break;
-                            case Player:
-                                break;
-                            case Enemy:
-                                data.entity.getComponent(AgentComp.class).takeDamage(weapon.damage);
-                                break;
-                            case Corpse:
-                                break;
-                            case Camera:
-                                break;
-                        }
-
-                    }
-
-
+                if(controller.attackDown && player.nextAllowedAttack < GdxGame.TIME){
+                    attack(player,bodyComp,weaponMap.get(entity));
                 }
             }
 
             capMovement(bodyComp);
 
         }
+    }
+
+    private boolean attack(PlayerComp player, BodyComp bodyComp, WeaponComp weapon){
+
+        player.nextAllowedAttack = GdxGame.TIME + weapon.attackDelay;
+
+        Vector2 pos = bodyComp.getPosition();
+        RayCastClosestHitable raycast = new RayCastClosestHitable();
+        bodyComp.body.getWorld().rayCast(
+                raycast,
+                pos.cpy(),
+                pos.cpy().add(new Vector2(1, 0).rotate(bodyComp.getOrientation() * MathUtils.radDeg).scl(weapon.reach))
+        );
+
+        if(raycast.hit){
+            EntityData data = (EntityData) raycast.body.getUserData();
+
+            switch (data.type){
+                case Wall:
+                    break;
+                case Player:
+                    break;
+                case Enemy:
+                    data.entity.getComponent(AgentComp.class).takeDamage(weapon.damage);
+                    return true;
+                case Corpse:
+                    break;
+                case Camera:
+                    break;
+            }
+
+        }
+
+        return false;
     }
 
     private void capMovement(BodyComp bodyComp){

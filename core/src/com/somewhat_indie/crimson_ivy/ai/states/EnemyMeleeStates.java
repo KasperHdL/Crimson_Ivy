@@ -1,8 +1,6 @@
 package com.somewhat_indie.crimson_ivy.ai.states;
 
-import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.fsm.State;
 import com.badlogic.gdx.ai.msg.Telegram;
@@ -16,7 +14,6 @@ import com.somewhat_indie.crimson_ivy.components.AgentComp;
 import com.somewhat_indie.crimson_ivy.components.BodyComp;
 import com.somewhat_indie.crimson_ivy.components.LightComp;
 import com.somewhat_indie.crimson_ivy.components.items.WeaponComp;
-import com.somewhat_indie.crimson_ivy.screens.GameScreen;
 import com.somewhat_indie.crimson_ivy.systems.PlayerSystem;
 
 /**

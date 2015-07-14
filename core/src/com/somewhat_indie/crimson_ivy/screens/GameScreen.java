@@ -34,7 +34,7 @@ public class GameScreen extends ScreenAdapter {
 
     RayHandler rayHandler;
 
-    public static World world;
+    World world;
 
     GameWorld gameWorld;
 
@@ -104,7 +104,7 @@ public class GameScreen extends ScreenAdapter {
 
     private void update_gameRunning(float deltaTime){
         engine.update(deltaTime);
-        world.step(deltaTime,6,2);
+        world.step(deltaTime,10,8);
     }
 
     private void update_gamePaused(float deltaTime){

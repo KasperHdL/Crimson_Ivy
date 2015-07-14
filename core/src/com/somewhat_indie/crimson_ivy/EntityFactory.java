@@ -16,7 +16,8 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.somewhat_indie.crimson_ivy.ai.AgentLimiter;
 import com.somewhat_indie.crimson_ivy.ai.states.EnemyMeleeStates;
 import com.somewhat_indie.crimson_ivy.components.*;
-import com.somewhat_indie.crimson_ivy.components.input.KeyboardMouseComp;
+import com.somewhat_indie.crimson_ivy.components.input.*;
+import com.somewhat_indie.crimson_ivy.components.input.mapping.linux.PS3;
 import com.somewhat_indie.crimson_ivy.components.items.WeaponComp;
 import com.somewhat_indie.crimson_ivy.systems.RenderSystem;
 
@@ -44,8 +45,8 @@ public class EntityFactory {
     }
 
     public static class Player{
-        public static Entity create_keyboard(Vector2 pos) {return create_keyboard(pos,0);}
-        public static Entity create_keyboard(Vector2 pos,float angle) {
+        public static Entity create_player(Vector2 pos,boolean useKeyboard) {return create_player(pos, useKeyboard, 0);}
+        public static Entity create_player(Vector2 pos,boolean useKeyboard,float angle) {
             Entity entity = new Entity();
 
             Vector2 size = new Vector2(1.2f, 1f);
@@ -64,13 +65,30 @@ public class EntityFactory {
             TransformComp transform = new TransformComp();
             entity.add(transform);
 
-            KeyboardMouseComp input = new KeyboardMouseComp();
-            input.leftKey = Input.Keys.A;
-            input.rightKey = Input.Keys.D;
-            input.upKey = Input.Keys.W;
-            input.downKey = Input.Keys.S;
-            input.attackKey = Input.Buttons.LEFT;
-            entity.add(input);
+            if(useKeyboard) {
+                KeyboardMouseComp input = new KeyboardMouseComp();
+                input.leftKey = Input.Keys.A;
+                input.rightKey = Input.Keys.D;
+                input.upKey = Input.Keys.W;
+                input.downKey = Input.Keys.S;
+                input.attackKey = Input.Buttons.LEFT;
+                entity.add(input);
+            }else{
+                ControllerComp input = new ControllerComp();
+
+                //See crimson_ivy.components.input.mapping for OS mappings
+                //the imported is used.. currently linux!
+
+                input.horizontalMovement    = PS3.AXIS_LEFT_X;
+                input.verticalMovement      = PS3.AXIS_LEFT_Y;
+                input.horizontalDirection   = PS3.AXIS_RIGHT_X;
+                input.verticalDirection     = PS3.AXIS_RIGHT_Y;
+                input.stickDeadzone         = PS3.STICK_DEADZONE;
+
+                input.attackButton = PS3.BUTTON_R1;
+
+                entity.add(input);
+            }
 
             TextureComp texture = new TextureComp(0xbadaffff);
             texture.region.setRegionWidth((int) (Settings.meterToPixel * size.x));
@@ -84,6 +102,7 @@ public class EntityFactory {
             BodyComp bodyComp = new BodyComp(world, BodyDef.BodyType.DynamicBody, shape, pos, 1f, 1f);
             bodyComp.body.setTransform(pos, angle);
             bodyComp.body.setLinearDamping(10f);
+            bodyComp.body.setFixedRotation(true);
 
             bodyComp.body.setUserData(new EntityData(EntityData.EntityType.Player, entity));
             entity.add(bodyComp);

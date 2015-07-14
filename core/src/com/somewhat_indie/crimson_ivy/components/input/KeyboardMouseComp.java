@@ -27,29 +27,28 @@ public class KeyboardMouseComp extends Component{
 
     public boolean attackDown = false;
 
+    //TODO prolly not the best way to do this....
 
-
-    public void handleMovement(BodyComp bodyComp, KeyboardMouseComp input,float deltaTime){
+    public void handleMovement(BodyComp bodyComp,float deltaTime){
         float x = 0;
         float y = 0;
 
-        Body body = bodyComp.body;
 
-        if (input.rightDown) {
+        if (rightDown) {
             x = 1;
-        } else if (input.leftDown) {
+        } else if (leftDown) {
             x = -1;
         }
 
-        if (input.upDown) {
+        if (upDown) {
             y = 1;
-        } else if (input.downDown) {
+        } else if (downDown) {
             y = -1;
         }
 
         Vector2 force = new Vector2(x,y).nor().scl(bodyComp.getMaxLinearAcceleration());
         force.scl(deltaTime);
-        body.applyForceToCenter(force, true);
+        bodyComp.body.applyForceToCenter(force, true);
 
     }
 
@@ -57,15 +56,12 @@ public class KeyboardMouseComp extends Component{
         Vector3 mouse = new Vector3(Gdx.input.getX(),Gdx.input.getY(),0);
 
         Vector2 delta;
-        {
-            Vector3 v = RenderSystem.getCamera().unproject(mouse);
-            Vector2 wMouse = new Vector2(v.x, v.y);
-            delta = wMouse.sub(body.getPosition());
-        }
+
+        Vector3 v = RenderSystem.getCamera().unproject(mouse);
+        Vector2 wMouse = new Vector2(v.x, v.y);
+        delta = wMouse.sub(body.getPosition());
 
 
-        float angle = MathUtils.degRad * delta.angle();
-
-        body.setTransform(body.getPosition(), angle);
+        body.setTransform(body.getPosition(), delta.angleRad());
     }
 }
