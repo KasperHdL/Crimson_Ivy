@@ -26,14 +26,14 @@ public class GdxGame extends Game {
 	@Override
 	public void create () {
 		batch = new SpriteBatch();
+		Settings.load();
+		Assets.load();
 
 		screens = new ScreenAdapter[]{
 				new MainMenuScreen(this),
 				new GameScreen(this)
 		};
 
-		Settings.load();
-		Assets.load();
 
 		setState(ScreenState.MainMenu);
 

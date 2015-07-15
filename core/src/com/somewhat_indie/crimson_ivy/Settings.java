@@ -5,11 +5,15 @@ package com.somewhat_indie.crimson_ivy;
  */
 public class Settings {
 
-    public static int SCREEN_WIDTH = 1280;
-    public static int SCREEN_HEIGHT = 720;
+    public static final int SCREEN_WIDTH = 1280;
+    public static final int SCREEN_HEIGHT = 720;
 
-    public static float meterToPixel = 32f;
-    public static float pixelToMeter = 1/meterToPixel;
+    public static final float METER_TO_PIXEL = 32f;
+    public static final float PIXEL_TO_METER = 1f / METER_TO_PIXEL;
+
+    public static final float ANIMATION_FRAMES_PER_SECOND = 1f / 10f;
+
+    public static final boolean DEBUG_BOX2D = false;
 
     public static void load(){
 

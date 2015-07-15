@@ -5,10 +5,16 @@ import box2dLight.PointLight;
 import box2dLight.PositionalLight;
 import box2dLight.RayHandler;
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ai.steer.behaviors.Seek;
 import com.badlogic.gdx.ai.steer.behaviors.Wander;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.TextureData;
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
@@ -49,14 +55,14 @@ public class EntityFactory {
         public static Entity create_player(Vector2 pos,boolean useKeyboard,float angle) {
             Entity entity = new Entity();
 
-            Vector2 size = new Vector2(1.2f, 1f);
+            Vector2 size = new Vector2(1f, 1f);
 
             entity.add(new AgentComp(50f));
 
             WeaponComp weapon = new WeaponComp();
             weapon.damage = 4f;
             weapon.reach = 5f;
-            weapon.attackDelay = .1f;
+            weapon.attackDelay = Settings.ANIMATION_FRAMES_PER_SECOND * 10;
             entity.add(weapon);
 
             PlayerComp player = new PlayerComp();
@@ -90,11 +96,17 @@ public class EntityFactory {
                 entity.add(input);
             }
 
-            TextureComp texture = new TextureComp(0xbadaffff);
-            texture.region.setRegionWidth((int) (Settings.meterToPixel * size.x));
-            texture.region.setRegionHeight((int) (Settings.meterToPixel * size.y));
-            entity.add(texture);
-
+            Gdx.app.log("Load", Assets.warrior.getHeight() + " px");
+            AnimationComp animation = new AnimationComp();
+            animation.size_in_meters = new Vector2(1,1);
+            animation.addAnimation("idle",Assets.warrior,10,1,0,0,10,5);
+            animation.addAnimation("gesture",Assets.warrior,10,1,0,1,10,5);
+            animation.addAnimation("walk",Assets.warrior,10,1,0,2,10,5);
+            animation.addAnimation("attack",Assets.warrior,10,1,0,3,10,5);
+            animation.addAnimation("death",Assets.warrior,10,1,0,4,10,5);
+            animation.defaultAnimation = "idle";
+            animation.setAnimation("idle");
+            entity.add(animation);
 
             PolygonShape shape = new PolygonShape();
             shape.setAsBox(size.x / 2, size.y / 2);
@@ -150,8 +162,8 @@ public class EntityFactory {
             entity.add(transform);
 
             TextureComp texture = new TextureComp(0xbadaff88);
-            texture.region.setRegionWidth((int) (Settings.meterToPixel * size.x));
-            texture.region.setRegionHeight((int) (Settings.meterToPixel * size.y));
+            texture.region.setRegionWidth((int) (Settings.METER_TO_PIXEL * size.x));
+            texture.region.setRegionHeight((int) (Settings.METER_TO_PIXEL * size.y));
             entity.add(texture);
 
             PolygonShape shape = new PolygonShape();
@@ -188,8 +200,8 @@ public class EntityFactory {
             entity.add(transform);
 
             TextureComp texture = new TextureComp(0xff6611ff);
-            texture.region.setRegionWidth((int) (Settings.meterToPixel * size.x));
-            texture.region.setRegionHeight((int) (Settings.meterToPixel * size.y));
+            texture.region.setRegionWidth((int) (Settings.METER_TO_PIXEL * size.x));
+            texture.region.setRegionHeight((int) (Settings.METER_TO_PIXEL * size.y));
             entity.add(texture);
 
             //box2d body
@@ -265,8 +277,8 @@ public class EntityFactory {
             entity.add(transform);
 
             TextureComp texture = new TextureComp(0xaa661188);
-            texture.region.setRegionWidth((int) (Settings.meterToPixel * size.x));
-            texture.region.setRegionHeight((int) (Settings.meterToPixel * size.y));
+            texture.region.setRegionWidth((int) (Settings.METER_TO_PIXEL * size.x));
+            texture.region.setRegionHeight((int) (Settings.METER_TO_PIXEL * size.y));
             entity.add(texture);
 
             //box2d body
@@ -298,8 +310,8 @@ public class EntityFactory {
         entity.add(transform);
 
         TextureComp texture = new TextureComp(0xffda55ff);
-        texture.region.setRegionWidth((int) (Settings.meterToPixel * size.x));
-        texture.region.setRegionHeight((int) (Settings.meterToPixel * size.y));
+        texture.region.setRegionWidth((int) (Settings.METER_TO_PIXEL * size.x));
+        texture.region.setRegionHeight((int) (Settings.METER_TO_PIXEL * size.y));
 
         entity.add(texture);
 

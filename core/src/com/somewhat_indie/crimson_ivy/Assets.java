@@ -10,9 +10,16 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
  */
 public class Assets {
 
-    public static Texture background;
+    public static Texture warrior;
+    public static String[] warrior_animation_names = new String[]{
+            "idle",
+            "gesture",
+            "walk",
+            "attack",
+            "death"
+    };
 
-    public static TextureRegion bg_mainmenu;
+
 
     public static BitmapFont font;
 
@@ -23,8 +30,8 @@ public class Assets {
     public static void load(){
 
         //Textures
-        background = loadTexture("badlogic.jpg");
-        bg_mainmenu = new TextureRegion(background,0,0,1,1);
+        Texture tex = loadTexture("warrior.png");
+        warrior = new TextureRegion(tex,0,0,320,320).getTexture();
 
         //Animations
 

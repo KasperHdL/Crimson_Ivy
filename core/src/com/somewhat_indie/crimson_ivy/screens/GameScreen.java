@@ -104,7 +104,7 @@ public class GameScreen extends ScreenAdapter {
 
     private void update_gameRunning(float deltaTime){
         engine.update(deltaTime);
-        world.step(deltaTime,10,8);
+        world.step(deltaTime,6,4);
     }
 
     private void update_gamePaused(float deltaTime){

@@ -12,15 +12,14 @@ import com.somewhat_indie.crimson_ivy.EntityData;
 import com.somewhat_indie.crimson_ivy.EntityFactory;
 import com.somewhat_indie.crimson_ivy.GameWorld;
 import com.somewhat_indie.crimson_ivy.GdxGame;
-import com.somewhat_indie.crimson_ivy.components.AgentComp;
-import com.somewhat_indie.crimson_ivy.components.BodyComp;
-import com.somewhat_indie.crimson_ivy.components.LightComp;
-import com.somewhat_indie.crimson_ivy.components.PlayerComp;
+import com.somewhat_indie.crimson_ivy.components.*;
 import com.somewhat_indie.crimson_ivy.components.input.ControllerComp;
 import com.somewhat_indie.crimson_ivy.components.input.KeyboardMouseComp;
 import com.somewhat_indie.crimson_ivy.components.items.WeaponComp;
 import com.somewhat_indie.crimson_ivy.raycasts.RayCastClosestHitable;
 import com.somewhat_indie.crimson_ivy.screens.GameScreen;
+
+import java.util.Objects;
 
 /**
  * Created by kaholi on 7/6/15.
@@ -31,6 +30,7 @@ public class PlayerSystem extends EntitySystem implements Telegraph{
     public static ImmutableArray<Entity> players;
 
     private ComponentMapper<PlayerComp>         playerMap       = ComponentMapper.getFor(PlayerComp.class);
+    private ComponentMapper<AnimationComp>      animationMap    = ComponentMapper.getFor(AnimationComp.class);
     private ComponentMapper<WeaponComp>         weaponMap       = ComponentMapper.getFor(WeaponComp.class);
     private ComponentMapper<KeyboardMouseComp>  keyboardMap     = ComponentMapper.getFor(KeyboardMouseComp.class);
     private ComponentMapper<ControllerComp>     controllerMap   = ComponentMapper.getFor(ControllerComp.class);
@@ -39,7 +39,7 @@ public class PlayerSystem extends EntitySystem implements Telegraph{
 
     public void addedToEngine(Engine engine){
         //noinspection unchecked
-        players = engine.getEntitiesFor(Family.all(PlayerComp.class, BodyComp.class).one(KeyboardMouseComp.class, ControllerComp.class).get());
+        players = engine.getEntitiesFor(Family.all(PlayerComp.class, BodyComp.class,AnimationComp.class).one(KeyboardMouseComp.class, ControllerComp.class).get());
     }
 
     public void update(float deltaTime){
@@ -49,14 +49,21 @@ public class PlayerSystem extends EntitySystem implements Telegraph{
             PlayerComp player = playerMap.get(entity);
             BodyComp bodyComp = bodyMap.get(entity);
 
+            AnimationComp animation = animationMap.get(entity);
+
             if(!entity.getComponent(AgentComp.class).isAlive){
                 entity.getComponent(LightComp.class).lights = null;
+                animation.setAnimation("death");
+                animation.jumpToDefaultWhenFinished = false;
+                entity.remove(PlayerComp.class);
 
-                GameWorld.create(EntityFactory.Player.create_player_corpse(bodyComp.getPosition(), bodyComp.getOrientation()));
-                GameWorld.destroy(entity);
+                //GameWorld.create(EntityFactory.Player.create_player_corpse(bodyComp.getPosition(), bodyComp.getOrientation()));
+                //GameWorld.destroy(entity);
 
                 continue;
             }
+
+
 
             //TODO refactor so controller & keyboard uses an abstract class or interface
             if (keyboardMap.has(entity)){
@@ -73,12 +80,19 @@ public class PlayerSystem extends EntitySystem implements Telegraph{
 
                 controller.handleMovement(bodyComp, deltaTime);
                 controller.handleDirection(bodyComp.body);
+                if (!bodyComp.getLinearVelocity().isZero())
+                    animation.setAnimation("walk");
 
                 if(controller.attackDown && player.nextAllowedAttack < GdxGame.TIME){
-                    attack(player,bodyComp,weaponMap.get(entity));
-                }
-            }
+                        attack(player,bodyComp,weaponMap.get(entity));
+                        animation.setAnimation("attack");
 
+                }
+
+
+
+
+            }
             capMovement(bodyComp);
 
         }

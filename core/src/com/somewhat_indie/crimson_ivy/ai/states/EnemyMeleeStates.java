@@ -25,7 +25,6 @@ public enum EnemyMeleeStates implements State<Entity> {
     COMBAT(){
         @Override
         public void enter(Entity entity) {
-            Gdx.app.log("Enemy Melee AI", "entered combat");
             BodyComp body = entity.getComponent(BodyComp.class);
             Seek<Vector2> seek;
             seek = (Seek<Vector2>) entity.getComponent(AIComp.class).steeringBehaviors.get("seek");
@@ -60,7 +59,6 @@ public enum EnemyMeleeStates implements State<Entity> {
 
         @Override
         public void exit(Entity entity) {
-            Gdx.app.log("Enemy Melee AI", "exited combat");
         }
 
         @Override
@@ -72,7 +70,6 @@ public enum EnemyMeleeStates implements State<Entity> {
     WANDER(){
         @Override
         public void enter(Entity entity) {
-            Gdx.app.log("Enemy Melee AI", "entered wander");
             BodyComp body = entity.getComponent(BodyComp.class);
             body.setSteeringBehavior(entity.getComponent(AIComp.class).steeringBehaviors.get("wander"));
         }
@@ -104,7 +101,6 @@ public enum EnemyMeleeStates implements State<Entity> {
 
         @Override
         public void exit(Entity entity) {
-            Gdx.app.log("Enemy Melee AI", "exited wander");
         }
 
         @Override
@@ -171,10 +167,8 @@ public enum EnemyMeleeStates implements State<Entity> {
         WeaponComp weapon = entity.getComponent(WeaponComp.class);
         nextAllowedAttack = GdxGame.TIME + weapon.attackDelay;
 
-        Gdx.app.log("Enemy Melee", "attacking " + ai.target);
         if(ai.target.getComponent(AgentComp.class).takeDamage(weapon.damage)){
             //killed player
-            //disengage(entity);
 
         }
 

@@ -20,8 +20,6 @@ public class AgentComp extends Component {
 
         health -= amount;
 
-        Gdx.app.log("Agent",health + " health");
-
         if(health <= 0){
             die();
             //TODO create particle splatter
