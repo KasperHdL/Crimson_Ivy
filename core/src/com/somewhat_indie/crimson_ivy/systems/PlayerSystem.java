@@ -88,7 +88,6 @@ public class PlayerSystem extends EntitySystem implements Telegraph{
                 controller.handleDirection(bodyComp.body);
 
                 if(controller.attackDown && player.nextAllowedAttack < GdxGame.TIME){
-                    attack(player,bodyComp,weaponMap.get(entity));
                     animation.setAnimation("attack");
                 }
 
@@ -96,6 +95,9 @@ public class PlayerSystem extends EntitySystem implements Telegraph{
 
 
             }
+            if(player.attack())
+                attack(player,bodyComp,weaponMap.get(entity));
+
             capMovement(bodyComp);
 
         }
@@ -105,16 +107,20 @@ public class PlayerSystem extends EntitySystem implements Telegraph{
 
         player.nextAllowedAttack = GdxGame.TIME + weapon.attackDelay;
 
+        Vector2 dir = new Vector2(1, 0).rotate(bodyComp.getOrientation() * MathUtils.radDeg);
+
         Vector2 pos = bodyComp.getPosition();
         RayCastClosestHitable raycast = new RayCastClosestHitable();
         bodyComp.body.getWorld().rayCast(
                 raycast,
                 pos.cpy(),
-                pos.cpy().add(new Vector2(1, 0).rotate(bodyComp.getOrientation() * MathUtils.radDeg).scl(weapon.reach))
+                pos.cpy().add(dir.cpy().scl(weapon.reach))
         );
 
         if(raycast.hit){
             EntityData data = (EntityData) raycast.body.getUserData();
+
+            raycast.body.applyForceToCenter(dir.scl(4000f),true);
 
             switch (data.type){
                 case Wall:

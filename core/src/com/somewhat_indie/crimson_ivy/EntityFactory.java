@@ -91,14 +91,17 @@ public class EntityFactory {
                 entity.add(input);
             }
 
-            Gdx.app.log("Load", Assets.warrior.getHeight() + " px");
             AnimationComp animation = new AnimationComp();
             animation.size_in_meters = new Vector2(size.x,size.y);
+
             animation.addAnimation("idle",Assets.warrior,10,1,0,0,10,5);
             animation.addAnimation("gesture",Assets.warrior,10,1,0,1,10,5);
             animation.addAnimation("walk",Assets.warrior,10,1,0,2,10,5);
             animation.addAnimation("attack",Assets.warrior,10,1,0,3,10,5);
             animation.addAnimation("death",Assets.warrior,10,1,0,4,10,5);
+
+            animation.addCallback("attack",5,player);
+
             animation.setDefaultAnimation("idle");
             animation.setAnimation("idle");
             entity.add(animation);
@@ -147,7 +150,7 @@ public class EntityFactory {
             shape.dispose();
             return entity;
         }
-        public static Entity create_player_corpse(Vector2 pos){return create_player_corpse(pos,0);}
+        public static Entity create_player_corpse(Vector2 pos){return create_player_corpse(pos, 0);}
         public static Entity create_player_corpse(Vector2 pos, float angle) {
             Entity entity = new Entity();
 

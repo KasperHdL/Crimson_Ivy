@@ -13,7 +13,7 @@ public class Settings {
 
     public static final float ANIMATION_FRAME_DURATION = 0.05f;
 
-    public static final boolean DEBUG_BOX2D = true;
+    public static final boolean DEBUG_BOX2D = false;
 
     public static void load(){
 
