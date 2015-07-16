@@ -19,17 +19,21 @@ public class AnimationComp extends Component {
 
     public Animation animation;
     public String current = "";
+    private boolean loopCurrent = false;
 
     public boolean jumpToDefaultWhenFinished = true;
-    public String defaultAnimation = "";
+    private String defaultAnimation = "";
+
 
     public Vector2 size_in_meters = new Vector2(1,1);
 
     private float stateTime = 0;
 
-    public void addAnimation(String name, Texture sheet, int cols, int rows){addAnimation(name, sheet,cols,rows,0,0,cols,rows);}
+    public void addAnimation(String name, Texture sheet, int cols, int rows){
+        addAnimation(name, sheet, cols, rows, 0, 0, cols, rows);
+    }
     public void addAnimation(String name, Texture sheet, int numCols, int numRows, int colOffset, int rowOffset, int totCols, int totRows){
-        addAnimation(name, sheet,numCols,numRows,colOffset, rowOffset,totCols,totRows, Animation.PlayMode.NORMAL);
+        addAnimation(name, sheet, numCols, numRows, colOffset, rowOffset, totCols, totRows, Animation.PlayMode.NORMAL);
     }
     public void addAnimation(String name, Texture sheet, int numCols, int numRows, int colOffset, int rowOffset, int totCols, int totRows, Animation.PlayMode mode){
         TextureRegion[][] tmp = TextureRegion.split(sheet, sheet.getWidth()/totCols, sheet.getHeight()/totRows);
@@ -41,24 +45,40 @@ public class AnimationComp extends Component {
                 frames[index++] = tmp[i+rowOffset][j+colOffset];
             }
         }
-        animations.put(name, new Animation(Settings.ANIMATION_FRAMES_PER_SECOND, Array.with(frames), mode));
+        animations.put(name, new Animation(Settings.ANIMATION_FRAME_DURATION, Array.with(frames), mode));
 
     }
 
-    public void setAnimation(String name){
-        animation = animations.get(name);
-        current = name;
-    }
-
-    public TextureRegion getKeyFrame(float deltaTime){
+    public void update(float deltaTime){
         stateTime += deltaTime;
-        if(animation.isAnimationFinished(stateTime) && jumpToDefaultWhenFinished){
-            Gdx.app.log("animation", "last " + current + " now " + defaultAnimation + " " + stateTime);
-            current = defaultAnimation;
-            animation = animations.get(current);
-            stateTime = 0;
-        }
 
+        if(animation.getAnimationDuration() < stateTime ) {
+            if (loopCurrent) {
+                stateTime = 0;
+            } else if (jumpToDefaultWhenFinished) {
+                stateTime = 0;
+                current = defaultAnimation;
+                animation = animations.get(defaultAnimation);
+            }
+        }
+    }
+
+
+    public void setAnimation(String name){setAnimation(name,false);}
+    public void setAnimation(String name,boolean loop){
+        animation = animations.get(name);
+        if(!current.equals(name)) {
+            stateTime = 0;
+            current = name;
+        }
+        loopCurrent = loop;
+    }
+
+    public void setDefaultAnimation(String name){
+        defaultAnimation = name;
+    }
+
+    public TextureRegion getKeyFrame(){
         return animation.getKeyFrame(stateTime);
     }
 

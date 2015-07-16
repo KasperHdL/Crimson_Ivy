@@ -84,10 +84,9 @@ public class RenderSystem extends EntitySystem {
                 height = tex.getRegionHeight() * Settings.PIXEL_TO_METER;
             }else{
                 AnimationComp ani = animationMap.get(entity);
-                tex = ani.getKeyFrame(deltaTime);
+                tex = ani.getKeyFrame();
                 width = ani.size_in_meters.x;
                 height = ani.size_in_meters.y;
-                Gdx.app.log("animation active", ani.current);
             }
 
             Vector2 origin = new Vector2(width/2,height/2);

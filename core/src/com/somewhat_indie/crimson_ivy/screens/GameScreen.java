@@ -63,6 +63,7 @@ public class GameScreen extends ScreenAdapter {
         gameWorld = new GameWorld(engine,world,rayHandler);
 
         engine.addSystem(new CameraSystem());
+        engine.addSystem(new AnimationSystem());
 
         KeyboardSystem k = new KeyboardSystem();
         Gdx.input.setInputProcessor(k);

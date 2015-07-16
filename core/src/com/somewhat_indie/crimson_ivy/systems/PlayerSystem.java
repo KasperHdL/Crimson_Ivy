@@ -78,15 +78,18 @@ public class PlayerSystem extends EntitySystem implements Telegraph{
             }else if(controllerMap.has(entity)){
                 ControllerComp controller = controllerMap.get(entity);
 
-                controller.handleMovement(bodyComp, deltaTime);
+                if(!animation.current.equals("attack")) {
+                    if(controller.handleMovement(bodyComp, deltaTime)){
+                        animation.setAnimation("walk",true);
+                    }else
+                        animation.setAnimation("idle", true);
+                }
+
                 controller.handleDirection(bodyComp.body);
-                if (!bodyComp.getLinearVelocity().isZero())
-                    animation.setAnimation("walk");
 
                 if(controller.attackDown && player.nextAllowedAttack < GdxGame.TIME){
-                        attack(player,bodyComp,weaponMap.get(entity));
-                        animation.setAnimation("attack");
-
+                    attack(player,bodyComp,weaponMap.get(entity));
+                    animation.setAnimation("attack");
                 }
 
 

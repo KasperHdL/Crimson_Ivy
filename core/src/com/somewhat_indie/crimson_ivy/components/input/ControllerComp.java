@@ -33,15 +33,15 @@ public class ControllerComp extends Component implements ControllerListener{
 
 
 
-    public void handleMovement(BodyComp bodyComp,float deltaTime){
+    public boolean handleMovement(BodyComp bodyComp,float deltaTime){
 
         if(movement.len() < stickDeadzone)
-            return;
+            return false;
 
         Vector2 force = movement.cpy().scl(bodyComp.getMaxLinearAcceleration());
         force.scl(deltaTime);
         bodyComp.body.applyForceToCenter(force, true);
-
+        return !force.isZero();
     }
 
     public void handleDirection(Body body){

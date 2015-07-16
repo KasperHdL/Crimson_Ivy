@@ -19,7 +19,7 @@ public class CameraSystem extends IteratingSystem {
     private ComponentMapper<CameraComp> cameraMap = ComponentMapper.getFor(CameraComp.class);
     private ComponentMapper<BodyComp> bodyMap = ComponentMapper.getFor(BodyComp.class);
 
-        public CameraSystem() {
+    public CameraSystem() {
             //noinspection unchecked
         super(Family.all(CameraComp.class).get());
 

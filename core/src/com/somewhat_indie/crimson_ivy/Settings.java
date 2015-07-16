@@ -11,9 +11,9 @@ public class Settings {
     public static final float METER_TO_PIXEL = 32f;
     public static final float PIXEL_TO_METER = 1f / METER_TO_PIXEL;
 
-    public static final float ANIMATION_FRAMES_PER_SECOND = 1f / 10f;
+    public static final float ANIMATION_FRAME_DURATION = 0.05f;
 
-    public static final boolean DEBUG_BOX2D = false;
+    public static final boolean DEBUG_BOX2D = true;
 
     public static void load(){
 
