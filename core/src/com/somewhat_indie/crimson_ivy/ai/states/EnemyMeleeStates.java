@@ -80,7 +80,6 @@ public enum EnemyMeleeStates implements State<Entity> {
             boolean foundPlayer = false;
             Vector2 pos = entity.getComponent(BodyComp.class).getPosition();
 
-
             for (int i = 0; i < PlayerSystem.players.size(); i++) {
                 Entity player = PlayerSystem.players.get(i);
                 Vector2 playerPos = player.getComponent(BodyComp.class).getPosition();

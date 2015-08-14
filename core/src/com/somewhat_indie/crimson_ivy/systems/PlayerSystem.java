@@ -2,24 +2,18 @@ package com.somewhat_indie.crimson_ivy.systems;
 
 import com.badlogic.ashley.core.*;
 import com.badlogic.ashley.utils.ImmutableArray;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.ai.msg.Telegraph;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.somewhat_indie.crimson_ivy.EntityData;
-import com.somewhat_indie.crimson_ivy.EntityFactory;
-import com.somewhat_indie.crimson_ivy.GameWorld;
 import com.somewhat_indie.crimson_ivy.GdxGame;
 import com.somewhat_indie.crimson_ivy.components.*;
 import com.somewhat_indie.crimson_ivy.components.input.ControllerComp;
 import com.somewhat_indie.crimson_ivy.components.input.KeyboardMouseComp;
 import com.somewhat_indie.crimson_ivy.components.items.WeaponComp;
 import com.somewhat_indie.crimson_ivy.raycasts.RayCastClosestHitable;
-import com.somewhat_indie.crimson_ivy.screens.GameScreen;
-
-import java.util.Objects;
 
 /**
  * Created by kaholi on 7/6/15.

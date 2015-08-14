@@ -53,7 +53,7 @@ public class GameWorld {
             for (Controller controller : Controllers.getControllers())
                 controller.addListener(player.getComponent(ControllerComp.class));
         }else
-            player = EntityFactory.Player.create_player(pos, false);
+            player = EntityFactory.Player.create_player(pos, true);
 
         Entity camera = EntityFactory.create_camera(player);
 
